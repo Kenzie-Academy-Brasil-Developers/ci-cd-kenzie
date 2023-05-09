@@ -2,15 +2,11 @@ name: WorkFlow Main
 on: pull_request
 
 jobs: 
-  checkout:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
   test:
     runs-on: ubuntu-latest
-    needs: checkout
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Using Node
         uses: actions/setup-node@v3
         with:
@@ -20,13 +16,15 @@ jobs:
       - name: Run tests
         run: npm run test
   deploy-Preview:
-    needs: [test, checkout]
+    needs: test
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     if: ${{ github.ref != 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
